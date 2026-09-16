@@ -22,20 +22,55 @@ jobs:
           flutter-version: '3.24.3'
           channel: 'stable'
 
-      - name: Generate Android Scaffold
+      - name: Auto Fix and Compile APK
         run: |
-          flutter create --org com.coachspot temp_project
-          cp -r temp_project/android ./
-          rm -rf temp_project
+          # 1. Ensure pubspec.yaml exists
+          if [ ! -f "pubspec.yaml" ]; then
+            cat << 'EOF' > pubspec.yaml
+          name: coachspot
+          description: "Train Coach Finder"
+          publish_to: 'none'
+          version: 1.0.0+1
+          environment:
+            sdk: ">=3.5.0 <4.0.0"
+          dependencies:
+            flutter:
+              sdk: flutter
+            firebase_core: ^3.8.0
+            firebase_auth: ^5.3.3
+            cloud_firestore: ^5.5.0
+            google_maps_flutter: ^2.10.0
+            image_picker: ^1.1.2
+            google_mlkit_text_recognition: ^0.13.0
+            geolocator: ^13.0.2
+          flutter:
+            uses-material-design: true
+          EOF
+          fi
 
-      - name: Get Packages
-        run: flutter pub get
+          # 2. Fix directory casing (Lib to lib)
+          if [ -d "Lib" ] && [ ! -d "lib" ]; then
+            mv Lib lib
+          fi
 
-      - name: Build Debug APK
-        run: flutter build apk --debug --no-tree-shake-icons
+          # 3. Create Android build scaffold
+          flutter create --org com.coachspot temp_scaffold
+          cp -r temp_scaffold/android ./
+          rm -rf temp_scaffold
+
+          # 4. Set Android SDK compatibility
+          sed -i 's/minSdkVersion = .*/minSdkVersion = 21/' android/app/build.gradle 2>/dev/null || true
+          sed -i 's/flutter.minSdkVersion/21/' android/app/build.gradle 2>/dev/null || true
+
+          # 5. Build Debug APK
+          flutter pub get
+          flutter build apk --debug --no-tree-shake-icons
+
+          mkdir -p $GITHUB_WORKSPACE/output_apk
+          cp build/app/outputs/flutter-apk/app-debug.apk $GITHUB_WORKSPACE/output_apk/
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: CoachSpot-App
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: output_apk/app-debug.apk
