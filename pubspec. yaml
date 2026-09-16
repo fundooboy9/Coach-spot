@@ -1,0 +1,21 @@
+name: coachspot
+description: "Train Coach Finder"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.8.0
+  firebase_auth: ^5.3.3
+  cloud_firestore: ^5.5.0
+  google_maps_flutter: ^2.10.0
+  image_picker: ^1.1.2
+  google_mlkit_text_recognition: ^0.13.0
+  geolocator: ^13.0.2
+
+flutter:
+  uses-material-design: true
