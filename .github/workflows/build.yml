@@ -24,10 +24,9 @@ jobs:
 
       - name: Fix Config & Compile APK
         run: |
-          # 1. Ensure pubspec.yaml exists
-          if [ ! -f "pubspec.yaml" ]; then
-            cat << 'EOF' > pubspec.yaml
-          name: coachspot
+          # 1. Ensure pubspec.yaml exists with valid name
+          cat << 'EOF' > pubspec.yaml
+          name: coach_spot
           description: "Train Coach Finder"
           publish_to: 'none'
           version: 1.0.0+1
@@ -46,16 +45,15 @@ jobs:
           flutter:
             uses-material-design: true
           EOF
-          fi
 
           # 2. Fix directory casing
           if [ -d "Lib" ] && [ ! -d "lib" ]; then
             mv Lib lib
           fi
 
-          # 3. Create fresh Android Scaffold
+          # 3. Create fresh Android Scaffold with valid project name
           rm -rf android
-          flutter create --org com.coachspot --platforms android .
+          flutter create --project-name coach_spot --org com.coachspot --platforms android .
 
           # 4. Set compileSdk 35 and minSdk 21
           sed -i 's/compileSdk = .*/compileSdk = 35/' android/app/build.gradle 2>/dev/null || true
